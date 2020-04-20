@@ -1,0 +1,107 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 225px;
+  height: 350px;
+  background-color: whitesmoke;
+  border: 1px solid lightslategray;
+  border-radius: 8px;
+  // pointer-events: none;
+  // user-select: none;
+}
+
+.storedCard {
+  transform: rotate(90deg);
+  top: -62px;
+}
+
+.cardNumber {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  padding-top: 4px;
+  padding-bottom: 2px;
+  padding-right: 5px;
+  border-right: 1px solid lightslategray;
+  border-bottom: 1px solid lightslategray;
+  border-bottom-right-radius: 25px;
+}
+
+.area {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 50%;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.roundMarkerNumbers {
+  display: flex;
+  align-items: center;
+  flex: 1 1 50%;
+
+  & > * {
+    flex: 1 1;
+    font-size: 30px;
+  }
+}
+
+.resources {
+  display: flex;
+  align-items: center;
+  flex: 1 1 50%;
+}
+
+.resource {
+  flex: 1 1;
+}
+
+.cardName {
+  position: relative;
+  background-color: brown;
+  color: whitesmoke;
+}
+
+.victoryPoints {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.upgradePoints {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  flex: 1 1 50%;
+}
+
+.action {
+  flex: 1 1 50%;
+  cursor: pointer;
+}
+
+.actionSymbol {
+  display: inline-block;
+}
+
+.colorBar {
+  background-color: blue;
+  flex: 1 1 15px;
+}
+
+.rotate180 {
+  transform: rotate(180deg);
+}
+
+.rotate270 {
+  transform: rotate(270deg);
+}

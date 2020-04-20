@@ -1,0 +1,23 @@
+.palmIsland {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  & > * {
+    margin: 5px;
+  }
+}
+
+.cardDisplay {
+  position: relative;
+  width: 225px;
+  height: 530px;
+
+  & > * {
+    position: absolute;
+  }
+}
+
+.topCard {
+  top: 175px;
+}
