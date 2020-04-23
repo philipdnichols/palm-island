@@ -5,22 +5,21 @@ import {
   PalmIslandCard,
   shuffle,
 } from "../constants/Cards";
+import { getOrientationForAction } from "../game/logic";
 
 export type PalmIslandPhase = "SETUP" | "CARD_DECISION";
 
 export interface PalmIslandState {
   phase: PalmIslandPhase;
   round: number;
-  resources: number;
   cards: PalmIslandCard[];
 }
 
 const initialState: PalmIslandState = {
   phase: "SETUP",
   round: 1,
-  resources: 0,
-  // cards: [...shuffle(BLUE_CARDS), BLUE_ROUND_MARKER_CARD],
-  cards: [...BLUE_CARDS, BLUE_ROUND_MARKER_CARD],
+  cards: [...shuffle(BLUE_CARDS), BLUE_ROUND_MARKER_CARD],
+  // cards: [...BLUE_CARDS, BLUE_ROUND_MARKER_CARD],
 };
 
 export const rootReducer = (
@@ -44,6 +43,32 @@ export const rootReducer = (
       const { cards } = state;
       const discardedCard: PalmIslandCard = cards.splice(0, 1)[0];
       return { ...state, cards: [...cards, discardedCard] };
+    }
+
+    case "PERFORM_ACTION": {
+      const { cards } = state;
+      const index: number = cards.findIndex(
+        (card: PalmIslandCard) => card.id === action.actionedCard?.id,
+      );
+      const actionedCard: PalmIslandCard = cards.splice(index, 1)[0];
+
+      switch (action.cardAction?.actionType) {
+        case "store":
+          actionedCard.isStored = true;
+          break;
+
+        case "rotate":
+        case "flip": {
+          actionedCard.activeOrientation = getOrientationForAction(
+            action.cardAction.actionType,
+            actionedCard.activeOrientation,
+          );
+          break;
+        }
+
+        default:
+      }
+      return { ...state, cards: [...cards, actionedCard] };
     }
 
     default:

@@ -1,5 +1,5 @@
-import { takeEvery, select, put } from "redux-saga/effects";
-import { DISCARD_TOP_CARD, discardTopCard } from "../actions";
+import { select, takeEvery } from "redux-saga/effects";
+import { DISCARD_TOP_CARD } from "../actions";
 import { PalmIslandCard } from "../constants/Cards";
 import { cardsSelector, roundSelector } from "../selectors";
 
@@ -23,4 +23,5 @@ function* checkIfTopCardIsNextRoundCard(): Generator {
 
 export function* watcherSaga(): Generator {
   yield takeEvery(DISCARD_TOP_CARD, checkIfTopCardIsNextRoundCard);
+  //yield takeEvery(PERFORM_ACTION, unstoreActionPaymentCards);
 }

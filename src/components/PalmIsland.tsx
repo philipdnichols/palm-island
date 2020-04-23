@@ -1,11 +1,15 @@
-import React, { Dispatch, ReactElement, ReactNode, CSSProperties } from "react";
 import cx from "classnames";
+import React, { CSSProperties, Dispatch, ReactElement, ReactNode } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { discardTopCard, PalmIslandAction } from "../actions";
-import { roundSelector, cardsSelector } from "../selectors";
-import { PalmIslandCard } from "../constants/Cards";
-import { Card } from "./Card";
-
+import { discardTopCard, PalmIslandAction, performAction } from "../actions";
+import {
+  PalmIslandCard,
+  PalmIslandCardAreaAction,
+  PalmIslandCardOrientation,
+} from "../constants/Cards";
+import { actionIsValid, resourcesFromCards } from "../game/logic";
+import { cardsSelector, roundSelector } from "../selectors";
+import { Card, resourceSymbolForType } from "./Card";
 import styles from "./PalmIsland.module.scss";
 
 export const PalmIsland = (): ReactElement | null => {
@@ -18,6 +22,42 @@ export const PalmIsland = (): ReactElement | null => {
 
   function handleDiscardTopCard(): void {
     dispatch(discardTopCard());
+  }
+
+  function handleCardActionValid(
+    card: PalmIslandCard,
+    areaOrientation: PalmIslandCardOrientation,
+    action: PalmIslandCardAreaAction,
+  ): boolean {
+    return actionIsValid(card, areaOrientation, action);
+  }
+
+  // TODO passing back itself might not be needed...can probably handle via smart function wrapping
+  function handleCardAction(
+    card: PalmIslandCard,
+    action: PalmIslandCardAreaAction,
+  ): void {
+    dispatch(performAction(card, action, []));
+  }
+
+  function renderAvailableResources(): ReactNode | null {
+    const storedCards: PalmIslandCard[] = cards.filter(
+      (card: PalmIslandCard) => card.isStored,
+    );
+    const [fish, log, stone] = resourcesFromCards(storedCards);
+
+    const renderedResources: ReactNode[] = [];
+    if (fish) {
+      renderedResources.push(`${fish}${resourceSymbolForType("fish")}`);
+    }
+    if (log) {
+      renderedResources.push(`${log}${resourceSymbolForType("log")}`);
+    }
+    if (stone) {
+      renderedResources.push(`${stone}${resourceSymbolForType("stone")}`);
+    }
+
+    return renderedResources;
   }
 
   function renderCard(
@@ -35,11 +75,13 @@ export const PalmIsland = (): ReactElement | null => {
         style={style}
         key={card.id}
         card={card}
+        isActionValid={handleCardActionValid}
+        onAction={handleCardAction}
       />
     );
   }
 
-  const render = (): ReactElement | null => {
+  function renderCards(): ReactNode | null {
     const [firstCard, secondCard, ...remainingCards] = cards;
 
     const cardsToRender: ReactNode[] = [];
@@ -58,10 +100,18 @@ export const PalmIsland = (): ReactElement | null => {
       }
     });
 
+    return cardsToRender;
+  }
+
+  const render = (): ReactElement | null => {
     return (
       <div className={cx(styles.palmIsland)}>
         <div>Round {round}</div>
-        <div className={cx(styles.cardDisplay)}>{cardsToRender}</div>
+        <div className={cx(styles.resourceDisplay)}>
+          Available Resources:
+          {renderAvailableResources()}
+        </div>
+        <div className={cx(styles.cardDisplay)}>{renderCards()}</div>
         <button type="button" onClick={handleDiscardTopCard}>
           Discard Top Card
         </button>

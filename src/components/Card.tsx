@@ -1,42 +1,50 @@
 import cx from "classnames";
-import React, { ReactElement, ReactNode, CSSProperties } from "react";
+import React, { CSSProperties, ReactElement, ReactNode } from "react";
 import {
   PalmIslandCard,
   PalmIslandCardArea,
   PalmIslandCardAreaAction,
   PalmIslandCardAreaActionCostType,
+  PalmIslandCardOrientation,
   PalmIslandCardResource,
   PalmIslandCardResourceType,
-  PalmIslandCardOrientation,
 } from "../constants/Cards";
 import styles from "./Card.module.scss";
+
+// TODO having the areas be a map instead of an array would simplify a lot
 
 export interface CardProps {
   card: PalmIslandCard;
   className?: string;
   style?: CSSProperties;
+  isActionValid: (
+    card: PalmIslandCard,
+    areaOrientation: PalmIslandCardOrientation,
+    action: PalmIslandCardAreaAction,
+  ) => boolean;
+  onAction: (card: PalmIslandCard, action: PalmIslandCardAreaAction) => void;
+}
+
+export function resourceSymbolForType(
+  resourceType: PalmIslandCardResourceType,
+): string {
+  switch (resourceType) {
+    case "fish":
+      return "🐟";
+
+    case "log":
+      return "🌲";
+
+    case "stone":
+      return "🗻";
+
+    default:
+      return "❓";
+  }
 }
 
 export const Card = (props: CardProps): ReactElement | null => {
-  const { card, className, style } = props;
-
-  function resourceSymbolForType(
-    resourceType: PalmIslandCardResourceType,
-  ): string {
-    switch (resourceType) {
-      case "fish":
-        return "🐟";
-
-      case "log":
-        return "🌲";
-
-      case "stone":
-        return "🗻";
-
-      default:
-        return "❓";
-    }
-  }
+  const { card, className, style, isActionValid } = props;
 
   function renderActionCost(
     actionCost: PalmIslandCardAreaActionCostType,
@@ -64,10 +72,8 @@ export const Card = (props: CardProps): ReactElement | null => {
     return renderedCosts;
   }
 
-  function renderActions(
-    actions: PalmIslandCardAreaAction[],
-  ): ReactNode | null {
-    const renderedActions: ReactNode[] = actions.map(
+  function renderActions(area: PalmIslandCardArea): ReactNode | null {
+    const renderedActions: ReactNode[] = area.availableActions.map(
       (action: PalmIslandCardAreaAction, index: number) => {
         let actionSymbol: string = "";
         switch (action.actionType) {
@@ -88,8 +94,26 @@ export const Card = (props: CardProps): ReactElement | null => {
 
         const key: string = `${action.actionType}${index}`;
 
+        const validAction: boolean = isActionValid(
+          card,
+          area.orientation,
+          action,
+        );
+
+        function handleClick(): void {
+          if (validAction) {
+            props.onAction(card, action);
+          }
+        }
+
         return (
-          <div key={key} className={cx(styles.action)}>
+          <div
+            key={key}
+            className={cx(styles.action, {
+              [styles.actionDisabled]: !validAction,
+            })}
+            onClick={handleClick}
+          >
             <div
               className={cx(styles.actionSymbol, {
                 [styles.rotate180]: action.actionType === "store",
@@ -187,9 +211,7 @@ export const Card = (props: CardProps): ReactElement | null => {
             </div>
           )}
         </div>
-        <div className={cx(styles.actions)}>
-          {renderActions(area.availableActions)}
-        </div>
+        <div className={cx(styles.actions)}>{renderActions(area)}</div>
       </div>
     );
   }
@@ -216,8 +238,12 @@ export const Card = (props: CardProps): ReactElement | null => {
     return (
       <div
         className={cx(className, styles.card, {
-          [styles.rotate180]: card.activeOrientation.endsWith("-rotated"),
-          [styles.storedCard]: card.isStored,
+          [styles.rotate180]:
+            card.activeOrientation.endsWith("-rotated") && !card.isStored,
+          [styles.storedCard]:
+            card.isStored && !card.activeOrientation.endsWith("-rotated"),
+          [styles.rotate180AndStoredCard]:
+            card.activeOrientation.endsWith("-rotated") && card.isStored,
         })}
         style={style}
       >
