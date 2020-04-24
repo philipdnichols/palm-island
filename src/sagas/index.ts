@@ -6,9 +6,7 @@ import { cardsSelector, roundSelector } from "../selectors";
 function* checkIfTopCardIsNextRoundCard(): Generator {
   console.log("checkIfTopCardIsNextRoundCard");
 
-  const cards: PalmIslandCard[] = (yield select(
-    cardsSelector,
-  )) as PalmIslandCard[];
+  const cards: PalmIslandCard[] = (yield select(cardsSelector)) as PalmIslandCard[];
 
   if (cards[0].isRoundMarker) {
     const round: number = (yield select(roundSelector)) as number;
@@ -23,5 +21,4 @@ function* checkIfTopCardIsNextRoundCard(): Generator {
 
 export function* watcherSaga(): Generator {
   yield takeEvery(DISCARD_TOP_CARD, checkIfTopCardIsNextRoundCard);
-  //yield takeEvery(PERFORM_ACTION, unstoreActionPaymentCards);
 }

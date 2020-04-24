@@ -7,21 +7,7 @@ import {
   PalmIslandCardResource,
 } from "../constants/Cards";
 
-export function actionIsValid(
-  card: PalmIslandCard,
-  areaOrientation: PalmIslandCardOrientation,
-  action: PalmIslandCardAreaAction,
-): boolean {
-  const freeAction: boolean = action.cost === "free";
-  const activeSide: boolean = card.activeOrientation === areaOrientation;
-  const storedCard: boolean = card.isStored;
-
-  return activeSide && !storedCard && freeAction;
-}
-
-export function resourcesFromCards(
-  cards: PalmIslandCard[],
-): [number, number, number] {
+export function resourcesFromCards(cards: PalmIslandCard[]): [number, number, number] {
   let fish: number = 0;
   let log: number = 0;
   let stone: number = 0;
@@ -69,7 +55,64 @@ export function resourcesFromCards(
   return [fish, log, stone];
 }
 
-export function getOrientationForAction(
+export function resourcesFromStoredCards(cards: PalmIslandCard[]): [number, number, number] {
+  const storedCards: PalmIslandCard[] = cards.filter((card: PalmIslandCard) => card.isStored);
+  return resourcesFromCards(storedCards);
+}
+
+export function checkHasEnoughResourcesToCoverActionCost(
+  cards: PalmIslandCard[],
+  action: PalmIslandCardAreaAction,
+  payment?: PalmIslandCard[],
+): boolean {
+  let hasEnoughResourcesToCoverCost: boolean = false;
+  const [fish, log, stone] = payment ? resourcesFromCards(payment) : resourcesFromStoredCards(cards);
+  if (action.cost === "free") {
+    hasEnoughResourcesToCoverCost = true;
+  } else {
+    action.cost.some((resources: PalmIslandCardResource[]) => {
+      let hasEnough: boolean = true;
+      resources.some((resource: PalmIslandCardResource) => {
+        switch (resource.resourceType) {
+          case "fish":
+            hasEnough = fish >= resource.resourceAmount;
+            break;
+
+          case "log":
+            hasEnough = log >= resource.resourceAmount;
+            break;
+
+          case "stone":
+            hasEnough = stone >= resource.resourceAmount;
+            break;
+
+          default:
+            hasEnough = false;
+            break;
+        }
+        return !hasEnough;
+      });
+      hasEnoughResourcesToCoverCost = hasEnough;
+      return hasEnoughResourcesToCoverCost;
+    });
+  }
+  return hasEnoughResourcesToCoverCost;
+}
+
+export function actionIsValid(
+  card: PalmIslandCard,
+  areaOrientation: PalmIslandCardOrientation,
+  action: PalmIslandCardAreaAction,
+  cards: PalmIslandCard[],
+): boolean {
+  const activeSide: boolean = card.activeOrientation === areaOrientation;
+  const storedCard: boolean = card.isStored;
+  const hasEnoughResourcesToCoverCost = checkHasEnoughResourcesToCoverActionCost(cards, action);
+
+  return activeSide && !storedCard && hasEnoughResourcesToCoverCost;
+}
+
+export function getResultingOrientationForAction(
   action: PalmIslandCardAreaActionType,
   orientation: PalmIslandCardOrientation,
 ): PalmIslandCardOrientation {

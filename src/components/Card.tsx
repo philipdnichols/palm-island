@@ -17,17 +17,11 @@ export interface CardProps {
   card: PalmIslandCard;
   className?: string;
   style?: CSSProperties;
-  isActionValid: (
-    card: PalmIslandCard,
-    areaOrientation: PalmIslandCardOrientation,
-    action: PalmIslandCardAreaAction,
-  ) => boolean;
-  onAction: (card: PalmIslandCard, action: PalmIslandCardAreaAction) => void;
+  isActionValid: (areaOrientation: PalmIslandCardOrientation, action: PalmIslandCardAreaAction) => boolean;
+  onAction: (action: PalmIslandCardAreaAction) => void;
 }
 
-export function resourceSymbolForType(
-  resourceType: PalmIslandCardResourceType,
-): string {
+export function resourceSymbolForType(resourceType: PalmIslandCardResourceType): string {
   switch (resourceType) {
     case "fish":
       return "🐟";
@@ -46,29 +40,23 @@ export function resourceSymbolForType(
 export const Card = (props: CardProps): ReactElement | null => {
   const { card, className, style, isActionValid } = props;
 
-  function renderActionCost(
-    actionCost: PalmIslandCardAreaActionCostType,
-  ): ReactNode | null {
+  function renderActionCost(actionCost: PalmIslandCardAreaActionCostType): ReactNode | null {
     if (actionCost === "free") {
       return "Free";
     }
 
     const renderedCosts: ReactNode[] = [];
-    actionCost.forEach(
-      (resourceGroup: PalmIslandCardResource[], index: number) => {
-        if (index !== 0) {
-          renderedCosts.push(" / ");
-        }
+    actionCost.forEach((resourceGroup: PalmIslandCardResource[], index: number) => {
+      if (index !== 0) {
+        renderedCosts.push(" / ");
+      }
 
-        renderedCosts.push(
-          resourceGroup.map((resource: PalmIslandCardResource) => {
-            return `${resource.resourceAmount} ${resourceSymbolForType(
-              resource.resourceType,
-            )}`;
-          }),
-        );
-      },
-    );
+      renderedCosts.push(
+        resourceGroup.map((resource: PalmIslandCardResource) => {
+          return `${resource.resourceAmount} ${resourceSymbolForType(resource.resourceType)}`;
+        }),
+      );
+    });
     return renderedCosts;
   }
 
@@ -94,19 +82,17 @@ export const Card = (props: CardProps): ReactElement | null => {
 
         const key: string = `${action.actionType}${index}`;
 
-        const validAction: boolean = isActionValid(
-          card,
-          area.orientation,
-          action,
-        );
+        const validAction: boolean = isActionValid(area.orientation, action);
 
         function handleClick(): void {
           if (validAction) {
-            props.onAction(card, action);
+            props.onAction(action);
           }
         }
 
+        // TODO change to button?
         return (
+          // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
           <div
             key={key}
             className={cx(styles.action, {
@@ -131,28 +117,22 @@ export const Card = (props: CardProps): ReactElement | null => {
     return renderedActions;
   }
 
-  function renderResources(
-    resources: PalmIslandCardResource[],
-  ): ReactNode | null {
-    const renderedResources: ReactNode[] = resources.map(
-      (resource: PalmIslandCardResource) => {
-        return [...Array(resource.resourceAmount)].map((_, index: number) => {
-          const key: string = `${resource.resourceType}${index}`;
-          return (
-            <div key={key} className={cx(styles.resource)}>
-              {resourceSymbolForType(resource.resourceType)}
-            </div>
-          );
-        });
-      },
-    );
+  function renderResources(resources: PalmIslandCardResource[]): ReactNode | null {
+    const renderedResources: ReactNode[] = resources.map((resource: PalmIslandCardResource) => {
+      return [...Array(resource.resourceAmount)].map((_, index: number) => {
+        const key: string = `${resource.resourceType}${index}`;
+        return (
+          <div key={key} className={cx(styles.resource)}>
+            {resourceSymbolForType(resource.resourceType)}
+          </div>
+        );
+      });
+    });
 
     return renderedResources;
   }
 
-  function renderRoundMarkerNumbers(
-    orientation: PalmIslandCardOrientation,
-  ): ReactNode | null {
+  function renderRoundMarkerNumbers(orientation: PalmIslandCardOrientation): ReactNode | null {
     let roundNumbers: string = "";
     switch (orientation) {
       case "faceup":
@@ -178,11 +158,7 @@ export const Card = (props: CardProps): ReactElement | null => {
     return <div>{roundNumbers}</div>;
   }
 
-  function renderArea(
-    name: string,
-    isRoundMarker: boolean,
-    area: PalmIslandCardArea,
-  ): ReactNode | null {
+  function renderArea(name: string, isRoundMarker: boolean, area: PalmIslandCardArea): ReactNode | null {
     return (
       <div
         className={cx(styles.area, {
@@ -190,26 +166,14 @@ export const Card = (props: CardProps): ReactElement | null => {
         })}
       >
         {!isRoundMarker ? (
-          <div className={cx(styles.resources)}>
-            {renderResources(area.resources)}
-          </div>
+          <div className={cx(styles.resources)}>{renderResources(area.resources)}</div>
         ) : (
-          <div className={cx(styles.roundMarkerNumbers)}>
-            {renderRoundMarkerNumbers(area.orientation)}
-          </div>
+          <div className={cx(styles.roundMarkerNumbers)}>{renderRoundMarkerNumbers(area.orientation)}</div>
         )}
         <div className={cx(styles.cardName)}>
-          {area.victoryPoints > 0 && (
-            <div className={cx(styles.victoryPoints)}>
-              {area.victoryPoints}⭐
-            </div>
-          )}
+          {area.victoryPoints > 0 && <div className={cx(styles.victoryPoints)}>{area.victoryPoints}⭐</div>}
           <div>{name}</div>
-          {area.upgradePoints > 0 && (
-            <div className={cx(styles.upgradePoints)}>
-              {area.upgradePoints}⬆
-            </div>
-          )}
+          {area.upgradePoints > 0 && <div className={cx(styles.upgradePoints)}>{area.upgradePoints}⬆</div>}
         </div>
         <div className={cx(styles.actions)}>{renderActions(area)}</div>
       </div>
@@ -238,18 +202,13 @@ export const Card = (props: CardProps): ReactElement | null => {
     return (
       <div
         className={cx(className, styles.card, {
-          [styles.rotate180]:
-            card.activeOrientation.endsWith("-rotated") && !card.isStored,
-          [styles.storedCard]:
-            card.isStored && !card.activeOrientation.endsWith("-rotated"),
-          [styles.rotate180AndStoredCard]:
-            card.activeOrientation.endsWith("-rotated") && card.isStored,
+          [styles.rotate180]: card.activeOrientation.endsWith("-rotated") && !card.isStored,
+          [styles.storedCard]: card.isStored && !card.activeOrientation.endsWith("-rotated"),
+          [styles.rotate180AndStoredCard]: card.activeOrientation.endsWith("-rotated") && card.isStored,
         })}
         style={style}
       >
-        {card.activeOrientation.startsWith("faceup") && (
-          <div className={cx(styles.cardNumber)}>{card.id}</div>
-        )}
+        {card.activeOrientation.startsWith("faceup") && <div className={cx(styles.cardNumber)}>{card.id}</div>}
         {renderArea(card.name, card.isRoundMarker, topArea)}
         <div className={cx(styles.colorBar)} />
         {renderArea(card.name, card.isRoundMarker, bottomArea)}

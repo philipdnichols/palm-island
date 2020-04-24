@@ -12,14 +12,7 @@ const sagaMiddleware: SagaMiddleware = createSagaMiddleware();
 // TODO create combined reducer
 export const store: Store<PalmIslandState, PalmIslandAction> = createStore(
   rootReducer,
-  composeWithDevTools(
-    applyMiddleware(
-      testBeforeMiddleware,
-      testAfterMiddleware,
-      sagaMiddleware,
-      testAfterMiddleware,
-    ),
-  ),
+  composeWithDevTools(applyMiddleware(testBeforeMiddleware, testAfterMiddleware, sagaMiddleware, testAfterMiddleware)),
 );
 
 sagaMiddleware.run(watcherSaga);
