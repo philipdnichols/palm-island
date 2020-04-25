@@ -7,8 +7,7 @@
   background-color: whitesmoke;
   border: 1px solid lightslategray;
   border-radius: 8px;
-  // pointer-events: none;
-  // user-select: none;
+  user-select: none;
 }
 
 .storedCard {
@@ -98,7 +97,11 @@
 
 .actionDisabled {
   background-color: lightgray;
-  cursor: not-allowed;
+  cursor: unset;
+}
+
+.highlightAction {
+  background-color: cornflowerblue;
 }
 
 .actionSymbol {

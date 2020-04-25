@@ -1,14 +1,8 @@
 export type PalmIslandCardColor = "red" | "blue";
-export type PalmIslandCardOrientation =
-  | "faceup"
-  | "faceup-rotated"
-  | "facedown"
-  | "facedown-rotated";
+export type PalmIslandCardOrientation = "faceup" | "faceup-rotated" | "facedown" | "facedown-rotated";
 export type PalmIslandCardResourceType = "fish" | "log" | "stone";
 export type PalmIslandCardAreaActionType = "store" | "rotate" | "flip";
-export type PalmIslandCardAreaActionCostType =
-  | "free"
-  | PalmIslandCardResource[][];
+export type PalmIslandCardAreaActionCostType = "free" | PalmIslandCardResource[][];
 
 export interface PalmIslandCardResource {
   resourceType: PalmIslandCardResourceType;
@@ -38,10 +32,7 @@ export interface PalmIslandCard {
   isRoundMarker: boolean;
 }
 
-const resource = (
-  resourceType: PalmIslandCardResourceType,
-  resourceAmount: number,
-): PalmIslandCardResource => {
+const resource = (resourceType: PalmIslandCardResourceType, resourceAmount: number): PalmIslandCardResource => {
   return {
     resourceType,
     resourceAmount,
@@ -327,21 +318,13 @@ const market = (id: number): PalmIslandCard => {
       },
       {
         orientation: "facedown-rotated",
-        resources: [
-          resource("log", 1),
-          resource("fish", 1),
-          resource("stone", 1),
-        ],
+        resources: [resource("log", 1), resource("fish", 1), resource("stone", 1)],
         upgradePoints: 2,
         victoryPoints: 0,
         availableActions: [
           {
             actionType: "store",
-            cost: [
-              [resource("log", 1)],
-              [resource("fish", 1)],
-              [resource("stone", 1)],
-            ],
+            cost: [[resource("log", 1)], [resource("fish", 1)], [resource("stone", 1)]],
           },
         ],
       },
@@ -455,9 +438,7 @@ const toolMaker = (id: number): PalmIslandCard => {
           },
           {
             actionType: "rotate",
-            cost: [
-              [resource("log", 1), resource("fish", 1), resource("stone", 2)],
-            ],
+            cost: [[resource("log", 1), resource("fish", 1), resource("stone", 2)]],
           },
         ],
       },
@@ -480,19 +461,13 @@ const toolMaker = (id: number): PalmIslandCard => {
           },
           {
             actionType: "rotate",
-            cost: [
-              [resource("log", 1), resource("fish", 1), resource("stone", 1)],
-            ],
+            cost: [[resource("log", 1), resource("fish", 1), resource("stone", 1)]],
           },
         ],
       },
       {
         orientation: "facedown-rotated",
-        resources: [
-          resource("log", 1),
-          resource("fish", 1),
-          resource("stone", 1),
-        ],
+        resources: [resource("log", 1), resource("fish", 1), resource("stone", 1)],
         upgradePoints: 2,
         victoryPoints: 0,
         availableActions: [
@@ -502,9 +477,7 @@ const toolMaker = (id: number): PalmIslandCard => {
           },
           {
             actionType: "flip",
-            cost: [
-              [resource("log", 2), resource("fish", 2), resource("stone", 2)],
-            ],
+            cost: [[resource("log", 2), resource("fish", 2), resource("stone", 2)]],
           },
         ],
       },
@@ -541,9 +514,7 @@ const housing = (id: number): PalmIslandCard => {
         availableActions: [
           {
             actionType: "flip",
-            cost: [
-              [resource("log", 1), resource("fish", 1), resource("stone", 1)],
-            ],
+            cost: [[resource("log", 1), resource("fish", 1), resource("stone", 1)]],
           },
         ],
       },
@@ -562,9 +533,7 @@ const housing = (id: number): PalmIslandCard => {
         availableActions: [
           {
             actionType: "rotate",
-            cost: [
-              [resource("log", 2), resource("fish", 2), resource("stone", 2)],
-            ],
+            cost: [[resource("log", 2), resource("fish", 2), resource("stone", 2)]],
           },
         ],
       },
@@ -589,9 +558,7 @@ const temple = (id: number): PalmIslandCard => {
         availableActions: [
           {
             actionType: "rotate",
-            cost: [
-              [resource("log", 1), resource("fish", 1), resource("stone", 2)],
-            ],
+            cost: [[resource("log", 1), resource("fish", 1), resource("stone", 2)]],
           },
         ],
       },
@@ -603,9 +570,7 @@ const temple = (id: number): PalmIslandCard => {
         availableActions: [
           {
             actionType: "flip",
-            cost: [
-              [resource("log", 2), resource("fish", 2), resource("stone", 3)],
-            ],
+            cost: [[resource("log", 2), resource("fish", 2), resource("stone", 3)]],
           },
         ],
       },
@@ -624,9 +589,7 @@ const temple = (id: number): PalmIslandCard => {
         availableActions: [
           {
             actionType: "rotate",
-            cost: [
-              [resource("log", 3), resource("fish", 3), resource("stone", 4)],
-            ],
+            cost: [[resource("log", 3), resource("fish", 3), resource("stone", 4)]],
           },
         ],
       },

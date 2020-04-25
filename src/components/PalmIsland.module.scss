@@ -21,3 +21,28 @@
 .topCard {
   top: 175px;
 }
+
+.selectedPaymentCard {
+  border: 2px solid cornflowerblue;
+}
+
+.gameOverScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  & > * {
+    margin: 5px;
+  }
+}
+
+.gameOverCardDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  pointer-events: none;
+  justify-content: center;
+
+  & > * {
+    margin: 5px;
+  }
+}

@@ -1,6 +1,11 @@
+import { Selector } from "react-redux";
 import { PalmIslandCard } from "../constants/Cards";
-import { PalmIslandState } from "../reducers";
+import { PalmIslandPhase, PalmIslandState } from "../reducers";
 
-export const cardsSelector = (state: PalmIslandState): PalmIslandCard[] => state.cards;
+export const cardsSelector: Selector<PalmIslandState, PalmIslandCard[]> = (state: PalmIslandState): PalmIslandCard[] =>
+  state.cards;
 
-export const roundSelector = (state: PalmIslandState): number => state.round;
+export const roundSelector: Selector<PalmIslandState, number> = (state: PalmIslandState): number => state.round;
+
+export const phaseSelector: Selector<PalmIslandState, PalmIslandPhase> = (state: PalmIslandState): PalmIslandPhase =>
+  state.phase;

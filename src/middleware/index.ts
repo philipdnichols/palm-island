@@ -1,6 +1,6 @@
 import { Dispatch, Middleware, MiddlewareAPI } from "redux";
 import { DISCARD_TOP_CARD, PalmIslandAction, PERFORM_ACTION } from "../actions";
-import { checkHasEnoughResourcesToCoverActionCost } from "../game/logic";
+import { atMaxResourceLimit, checkHasEnoughResourcesToCoverActionCost } from "../game/logic";
 import { PalmIslandState } from "../reducers";
 
 export const testAfterMiddleware: Middleware<{}, PalmIslandState, Dispatch<PalmIslandAction>> = () => {
@@ -9,7 +9,7 @@ export const testAfterMiddleware: Middleware<{}, PalmIslandState, Dispatch<PalmI
       next(action);
 
       if (action.type === DISCARD_TOP_CARD) {
-        console.log("my middleware after action");
+        // console.log("my middleware after action");
       }
     };
   };
@@ -21,15 +21,24 @@ export const testBeforeMiddleware: Middleware<{}, PalmIslandState, Dispatch<Palm
   return (next: Dispatch<PalmIslandAction>) => {
     return (action: PalmIslandAction): void => {
       if (action.type === DISCARD_TOP_CARD) {
-        console.log("my middleware before action");
-      } else if (action.type === PERFORM_ACTION) {
-        console.log("testing if action paid for");
-        if (
-          action.cardAction &&
-          !checkHasEnoughResourcesToCoverActionCost(api.getState().cards, action.cardAction, action.actionPayment)
-        ) {
-          console.log("card action not paid for!");
+        // console.log("my middleware before action");
+        if (api.getState().cards[0].isRoundMarker) {
+          // console.log("cannot discard round marker card");
           return;
+        }
+      } else if (action.type === PERFORM_ACTION) {
+        // console.log("testing if action paid for");
+        if (action.cardAction) {
+          if (
+            !checkHasEnoughResourcesToCoverActionCost(api.getState().cards, action.cardAction, action.actionPayment)
+          ) {
+            // console.log("card action not paid for!");
+            return;
+          }
+          if (atMaxResourceLimit(api.getState().cards) && action.actionPayment?.length === 0) {
+            // console.log("at max resource limit");
+            return;
+          }
         }
       }
 

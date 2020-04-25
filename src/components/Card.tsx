@@ -17,8 +17,10 @@ export interface CardProps {
   card: PalmIslandCard;
   className?: string;
   style?: CSSProperties;
-  isActionValid: (areaOrientation: PalmIslandCardOrientation, action: PalmIslandCardAreaAction) => boolean;
-  onAction: (action: PalmIslandCardAreaAction) => void;
+  isActionValid?: (areaOrientation: PalmIslandCardOrientation, action: PalmIslandCardAreaAction) => boolean;
+  onAction?: (action: PalmIslandCardAreaAction) => void;
+  cardIsBeingActioned?: boolean;
+  actionBeingPaidFor?: PalmIslandCardAreaAction | null;
 }
 
 export function resourceSymbolForType(resourceType: PalmIslandCardResourceType): string {
@@ -38,7 +40,7 @@ export function resourceSymbolForType(resourceType: PalmIslandCardResourceType):
 }
 
 export const Card = (props: CardProps): ReactElement | null => {
-  const { card, className, style, isActionValid } = props;
+  const { card, className, style, isActionValid, onAction, cardIsBeingActioned, actionBeingPaidFor } = props;
 
   function renderActionCost(actionCost: PalmIslandCardAreaActionCostType): ReactNode | null {
     if (actionCost === "free") {
@@ -61,64 +63,66 @@ export const Card = (props: CardProps): ReactElement | null => {
   }
 
   function renderActions(area: PalmIslandCardArea): ReactNode | null {
-    const renderedActions: ReactNode[] = area.availableActions.map(
-      (action: PalmIslandCardAreaAction, index: number) => {
-        let actionSymbol: string = "";
-        switch (action.actionType) {
-          case "store":
-            actionSymbol = "↩";
-            break;
+    return area.availableActions.map((action: PalmIslandCardAreaAction, index: number) => {
+      let actionSymbol: string = "";
+      switch (action.actionType) {
+        case "store":
+          actionSymbol = "↩";
+          break;
 
-          case "rotate":
-            actionSymbol = "↩";
-            break;
+        case "rotate":
+          actionSymbol = "↩";
+          break;
 
-          case "flip":
-            actionSymbol = "🔁";
-            break;
+        case "flip":
+          actionSymbol = "🔁";
+          break;
 
-          default:
+        default:
+      }
+
+      const key: string = `${action.actionType}${index}`;
+
+      const validAction: boolean = !!isActionValid && isActionValid(area.orientation, action);
+
+      const isActionBeingPaidFor: boolean =
+        !!cardIsBeingActioned &&
+        area.orientation === card.activeOrientation &&
+        actionBeingPaidFor?.actionType === action.actionType;
+
+      function handleClick(): void {
+        if (validAction && onAction) {
+          onAction(action);
         }
+      }
 
-        const key: string = `${action.actionType}${index}`;
-
-        const validAction: boolean = isActionValid(area.orientation, action);
-
-        function handleClick(): void {
-          if (validAction) {
-            props.onAction(action);
-          }
-        }
-
-        // TODO change to button?
-        return (
-          // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+      // TODO change to button?
+      return (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+        <div
+          key={key}
+          className={cx(styles.action, {
+            [styles.actionDisabled]: !validAction,
+            [styles.highlightAction]: isActionBeingPaidFor,
+          })}
+          onClick={handleClick}
+        >
           <div
-            key={key}
-            className={cx(styles.action, {
-              [styles.actionDisabled]: !validAction,
+            className={cx(styles.actionSymbol, {
+              [styles.rotate180]: action.actionType === "store",
+              [styles.rotate270]: action.actionType === "rotate",
             })}
-            onClick={handleClick}
           >
-            <div
-              className={cx(styles.actionSymbol, {
-                [styles.rotate180]: action.actionType === "store",
-                [styles.rotate270]: action.actionType === "rotate",
-              })}
-            >
-              {actionSymbol}
-            </div>
-            :{renderActionCost(action.cost)}
+            {actionSymbol}
           </div>
-        );
-      },
-    );
-
-    return renderedActions;
+          :{renderActionCost(action.cost)}
+        </div>
+      );
+    });
   }
 
   function renderResources(resources: PalmIslandCardResource[]): ReactNode | null {
-    const renderedResources: ReactNode[] = resources.map((resource: PalmIslandCardResource) => {
+    return resources.map((resource: PalmIslandCardResource) => {
       return [...Array(resource.resourceAmount)].map((_, index: number) => {
         const key: string = `${resource.resourceType}${index}`;
         return (
@@ -128,8 +132,6 @@ export const Card = (props: CardProps): ReactElement | null => {
         );
       });
     });
-
-    return renderedResources;
   }
 
   function renderRoundMarkerNumbers(orientation: PalmIslandCardOrientation): ReactNode | null {
@@ -144,11 +146,11 @@ export const Card = (props: CardProps): ReactElement | null => {
         break;
 
       case "facedown":
-        roundNumbers = "3 / 7";
+        roundNumbers = "4 / 8";
         break;
 
       case "facedown-rotated":
-        roundNumbers = "4 / 8";
+        roundNumbers = "3 / 7";
         break;
 
       default:

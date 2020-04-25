@@ -51,7 +51,7 @@ module.exports = {
     "no-plusplus": "off",
     "prefer-destructuring": "off",
     "jsx-a11y/accessible-emoji": "off",
-    "no-param-reassign": ["error", { props: false }],
+    "no-param-reassign": "off", // immer relies on this :)
   },
   settings: {
     "import/extensions": [".ts", ".tsx"],
