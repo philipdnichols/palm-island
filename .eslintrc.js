@@ -30,7 +30,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: "module",
   },
-  plugins: ["react", "@typescript-eslint"],
+  plugins: ["react", "@typescript-eslint", "react-hooks", "jsx-a11y"],
   rules: {
     quotes: ["error", "double"],
     "import/extensions": [
@@ -52,6 +52,7 @@ module.exports = {
     "prefer-destructuring": "off",
     "jsx-a11y/accessible-emoji": "off",
     "no-param-reassign": "off", // immer relies on this :)
+    "react-hooks/exhaustive-deps": "error",
   },
   settings: {
     "import/extensions": [".ts", ".tsx"],

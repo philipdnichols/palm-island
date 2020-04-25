@@ -1,6 +1,6 @@
 import cx from "classnames";
 import produce from "immer";
-import React, { CSSProperties, Dispatch, ReactElement, ReactNode, useState } from "react";
+import React, { CSSProperties, Dispatch, ReactElement, ReactNode, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { discardTopCard, newGame, PalmIslandAction, performAction } from "../actions";
 import { PalmIslandCard, PalmIslandCardAreaAction, PalmIslandCardOrientation } from "../constants/Cards";
@@ -26,6 +26,49 @@ export const PalmIsland = (): ReactElement | null => {
   const [actionedCard, setActionedCard] = useState<PalmIslandCard | null>(null);
   const [cardAction, setCardAction] = useState<PalmIslandCardAreaAction | null>(null);
   const [actionPayment, setActionPayment] = useState<PalmIslandCard[]>([]);
+  const [cardHighlightActive, setCardHighlightActive] = useState<boolean>(false);
+  const [hoveredCard, setHoveredCard] = useState<PalmIslandCard | null>(null);
+
+  // const handleKeyDown = useCallback(
+  //   (e: KeyboardEvent): void => {
+  //     if (e.key === "Control") {
+  //       if (hoveredCard) {
+  //         setCardHighlightActive(true);
+  //       }
+  //     }
+  //   },
+  //   [hoveredCard],
+  // );
+  //
+  // const handleKeyUp = useCallback((e: KeyboardEvent): void => {
+  //   if (e.key === "Control") {
+  //     setCardHighlightActive(false);
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent): void {
+      if (e.key === "Control") {
+        if (hoveredCard) {
+          setCardHighlightActive(true);
+        }
+      }
+    }
+
+    function handleKeyUp(e: KeyboardEvent): void {
+      if (e.key === "Control") {
+        setCardHighlightActive(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+
+    return (): void => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [hoveredCard]);
 
   function handleDiscardTopCard(): void {
     dispatch(discardTopCard());
@@ -78,6 +121,8 @@ export const PalmIsland = (): ReactElement | null => {
       }
     }
 
+    const isHoveredCard: boolean = hoveredCard?.id === card.id;
+
     function handleCardActionValid(
       areaOrientation: PalmIslandCardOrientation,
       action: PalmIslandCardAreaAction,
@@ -118,9 +163,27 @@ export const PalmIsland = (): ReactElement | null => {
       }
     }
 
+    function handleMouseEnter(): void {
+      setHoveredCard(card);
+    }
+
+    function handleMouseLeave(): void {
+      setHoveredCard(null);
+      setCardHighlightActive(false);
+    }
+
+    // TODO this card rooted at a div is wonky when considering stored cards, where the parent div is not rotated
+    //  as well and the onClick is triggered only because a child is clicked. Should probably just have a card onClick
+    //  prop
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
-      <div className={cx({ [styles.topCard]: isTopCard })} key={card.id} onClick={handleCardClick}>
+      <div
+        className={cx({ [styles.topCard]: isTopCard, [styles.highlightCard]: isHoveredCard && cardHighlightActive })}
+        key={card.id}
+        onClick={handleCardClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         <Card
           className={cx({ [styles.selectedPaymentCard]: cardSelectedAsPayment })}
           style={style}
@@ -164,26 +227,29 @@ export const PalmIsland = (): ReactElement | null => {
     dispatch(newGame());
   }
 
-  const render = (): ReactElement | null => {
+  function render(): ReactElement | null {
     return phase !== "GAME_OVER" ? (
-      <div className={cx(styles.palmIsland)}>
-        <div>Round {round}</div>
-        <div className={cx(styles.resourceDisplay)}>Available Resources: {renderAvailableResources()}</div>
-        <div className={cx(styles.cardDisplay)}>{renderCards()}</div>
-        {choosingPayment ? (
-          <div>
-            <button type="button" onClick={handleCancelPayment}>
-              Cancel Payment
+      <div>
+        <div className={cx({ [styles.cardHighlightMask]: cardHighlightActive })} />
+        <div className={cx(styles.palmIsland)}>
+          <div>Round {round}</div>
+          <div className={cx(styles.resourceDisplay)}>Available Resources: {renderAvailableResources()}</div>
+          <div className={cx(styles.cardDisplay)}>{renderCards()}</div>
+          {choosingPayment ? (
+            <div>
+              <button type="button" onClick={handleCancelPayment}>
+                Cancel Payment
+              </button>
+              <button type="button" onClick={handleConfirmPayment} disabled={!confirmPaymentIsValid()}>
+                Confirm Payment
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={handleDiscardTopCard} disabled={cards[0].isRoundMarker}>
+              Discard Top Card
             </button>
-            <button type="button" onClick={handleConfirmPayment} disabled={!confirmPaymentIsValid()}>
-              Confirm Payment
-            </button>
-          </div>
-        ) : (
-          <button type="button" onClick={handleDiscardTopCard} disabled={cards[0].isRoundMarker}>
-            Discard Top Card
-          </button>
-        )}
+          )}
+        </div>
       </div>
     ) : (
       <div className={cx(styles.gameOverScreen)}>
@@ -198,7 +264,7 @@ export const PalmIsland = (): ReactElement | null => {
         </div>
       </div>
     );
-  };
+  }
 
   return render();
 };
