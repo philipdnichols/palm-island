@@ -1,11 +1,15 @@
 import { PalmIslandCard, PalmIslandCardAreaAction } from "../constants/Cards";
 
-export const NEW_GAME = "NEW_GAME";
-export const END_GAME = "END_GAME";
-export const DISCARD_TOP_CARD = "DISCARD_TOP_CARD";
-export const PERFORM_ACTION = "PERFORM_ACTION";
+export const NEW_GAME = "PalmIsland::NEW_GAME";
+export const END_GAME = "PalmIsland::END_GAME";
+export const DISCARD_TOP_CARD = "PalmIsland::DISCARD_TOP_CARD";
+export const PERFORM_ACTION = "PalmIsland::PERFORM_ACTION";
 
-type PalmIslandActionType = "NEW_GAME" | "END_GAME" | "DISCARD_TOP_CARD" | "PERFORM_ACTION";
+type PalmIslandActionType =
+  | "PalmIsland::NEW_GAME"
+  | "PalmIsland::END_GAME"
+  | "PalmIsland::DISCARD_TOP_CARD"
+  | "PalmIsland::PERFORM_ACTION";
 
 export interface PalmIslandAction {
   type: PalmIslandActionType;

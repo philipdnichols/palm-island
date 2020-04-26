@@ -1,3 +1,13 @@
+.palmIsland {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  & > * {
+    margin: 5px;
+  }
+}
+
 .cardHighlightMask {
   position: absolute;
   width: 100%;
@@ -12,14 +22,21 @@
   display: none;
 }
 
-.palmIsland {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.gameLogOverflowWrapper {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 500px;
+  height: 100px;
+  overflow: hidden;
 
-  & > * {
-    margin: 5px;
-  }
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+}
+
+.gameLog {
+  height: 100%;
+  overflow: auto
 }
 
 .cardDisplay {

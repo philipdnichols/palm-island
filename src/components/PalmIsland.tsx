@@ -2,7 +2,8 @@ import cx from "classnames";
 import produce from "immer";
 import React, { CSSProperties, Dispatch, ReactElement, ReactNode, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { discardTopCard, newGame, PalmIslandAction, performAction } from "../actions";
+import { CombinedState } from "redux";
+import { discardTopCard, newGame, PalmIslandAction, performAction } from "../actions/palmIslandActions";
 import { PalmIslandCard, PalmIslandCardAreaAction, PalmIslandCardOrientation } from "../constants/Cards";
 import {
   actionIsValid,
@@ -11,15 +12,26 @@ import {
   checkHasEnoughResourcesToCoverActionCost,
   resourcesFromStoredCards,
 } from "../game/logic";
-import { cardsSelector, phaseSelector, roundSelector } from "../selectors";
+import { cardsSelector, phaseSelector, roundSelector } from "../selectors/palmIslandSelectors";
 import { Card, resourceSymbolForType } from "./Card";
 import styles from "./PalmIsland.module.scss";
-import { PalmIslandPhase, PalmIslandState } from "../reducers";
+import { PalmIslandPhase, PalmIslandState } from "../reducers/palmIslandReducer";
+import { GameLogState } from "../reducers/gameLogReducer";
+import { GameLog } from "./GameLog";
 
 export const PalmIsland = (): ReactElement | null => {
-  const round: number = useSelector<PalmIslandState, number>(roundSelector);
-  const cards: PalmIslandCard[] = useSelector<PalmIslandState, PalmIslandCard[]>(cardsSelector);
-  const phase: PalmIslandPhase = useSelector<PalmIslandState, PalmIslandPhase>(phaseSelector);
+  const round: number = useSelector<
+    CombinedState<{ palmIslandReducer: PalmIslandState; gameLogReducer: GameLogState }>,
+    number
+  >(roundSelector);
+  const cards: PalmIslandCard[] = useSelector<
+    CombinedState<{ palmIslandReducer: PalmIslandState; gameLogReducer: GameLogState }>,
+    PalmIslandCard[]
+  >(cardsSelector);
+  const phase: PalmIslandPhase = useSelector<
+    CombinedState<{ palmIslandReducer: PalmIslandState; gameLogReducer: GameLogState }>,
+    PalmIslandPhase
+  >(phaseSelector);
   const dispatch: Dispatch<PalmIslandAction> = useDispatch<Dispatch<PalmIslandAction>>();
 
   const [choosingPayment, setChoosingPayment] = useState<boolean>(false);
@@ -245,6 +257,9 @@ export const PalmIsland = (): ReactElement | null => {
   function render(): ReactElement | null {
     return phase !== "GAME_OVER" ? (
       <div>
+        <div className={cx(styles.gameLogOverflowWrapper)}>
+          <GameLog className={cx(styles.gameLog)} />
+        </div>
         <div className={cx({ [styles.cardHighlightMask]: cardHighlightActive })} />
         <div className={cx(styles.palmIsland)}>
           <div>Round {round}</div>

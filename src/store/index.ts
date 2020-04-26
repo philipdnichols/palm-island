@@ -1,18 +1,21 @@
-import { applyMiddleware, createStore, Store } from "redux";
+import { applyMiddleware, CombinedState, createStore, Store } from "redux";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { composeWithDevTools } from "redux-devtools-extension";
 import createSagaMiddleware, { SagaMiddleware } from "redux-saga";
-import { PalmIslandAction } from "../actions";
 import { testAfterMiddleware, testBeforeMiddleware } from "../middleware";
-import { PalmIslandState, rootReducer } from "../reducers";
 import { watcherSaga } from "../sagas";
+import { combinedReducers } from "../reducers";
+import { GameLogState } from "../reducers/gameLogReducer";
+import { PalmIslandState } from "../reducers/palmIslandReducer";
 
 const sagaMiddleware: SagaMiddleware = createSagaMiddleware();
 
-// TODO create combined reducer
-export const store: Store<PalmIslandState, PalmIslandAction> = createStore(
-  rootReducer,
-  composeWithDevTools(applyMiddleware(testBeforeMiddleware, testAfterMiddleware, sagaMiddleware, testAfterMiddleware)),
+export const store: Store<CombinedState<{
+  palmIslandReducer: PalmIslandState;
+  gameLogReducer: GameLogState;
+}>> = createStore(
+  combinedReducers,
+  composeWithDevTools(applyMiddleware(testBeforeMiddleware, testAfterMiddleware, sagaMiddleware)),
 );
 
 sagaMiddleware.run(watcherSaga);

@@ -3,6 +3,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ## TODO
 * Add R and F key shortcuts when highlighting a card to flip and rotate the card (view only, doesn't affect state)
 * Add payment checker that makes sure you are not overpaying
+* Add toast alerts for middleware/saga initiated actions. Toast alerts for "last round" and other stuff would be nice as well.
+* Discard card action needs a context for better logging (distinguish between user-initiated vs saga/middleware initiated, likely all actions could benefit from this)
+* Clean up code :)
+* Clean up long type definitions...wondering if its even worth using typescript for my personal projects, not sure how much benefit they provide vs the overhead of dealing with types
 * Add new game button
 * Add score chart to see how the score ratings are calculated
 * Feats (achievements that, once per game, if achieved, add cards to subsequent games)
