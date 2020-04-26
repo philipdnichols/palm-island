@@ -50,7 +50,10 @@ export const PalmIsland = (): ReactElement | null => {
     function handleKeyDown(e: KeyboardEvent): void {
       if (e.key === "Control") {
         if (hoveredCard) {
-          setCardHighlightActive(true);
+          const index: number = cards.findIndex((card: PalmIslandCard) => card.id === hoveredCard?.id);
+          if (index === 0 || index === 1 || index === 2) {
+            setCardHighlightActive(true);
+          }
         }
       }
     }
@@ -68,7 +71,7 @@ export const PalmIsland = (): ReactElement | null => {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
     };
-  }, [hoveredCard]);
+  }, [hoveredCard, cards]);
 
   function handleDiscardTopCard(): void {
     dispatch(discardTopCard());
@@ -108,7 +111,7 @@ export const PalmIsland = (): ReactElement | null => {
     return renderedResources;
   }
 
-  function renderCard(card: PalmIslandCard, isTopCard?: boolean, left?: number): ReactNode | null {
+  function renderCard(card: PalmIslandCard, indexInDeck?: number, left?: number): ReactNode | null {
     const style: CSSProperties = {};
     if (card.isStored) {
       style.left = `${left}px`;
@@ -154,7 +157,7 @@ export const PalmIsland = (): ReactElement | null => {
     }
 
     function handleCardAction(action: PalmIslandCardAreaAction): void {
-      if (action.cost === "free" && !atMaxResourceLimit(cards)) {
+      if (action.cost === "free" && (!atMaxResourceLimit(cards) || card.isRoundMarker)) {
         dispatch(performAction(card, action, []));
       } else {
         setChoosingPayment(true);
@@ -178,7 +181,11 @@ export const PalmIsland = (): ReactElement | null => {
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
       <div
-        className={cx({ [styles.topCard]: isTopCard, [styles.highlightCard]: isHoveredCard && cardHighlightActive })}
+        className={cx({
+          [styles.topCard]: indexInDeck === 0,
+          [styles.peekThirdCard]: indexInDeck === 2 && !card.isStored,
+          [styles.highlightCard]: isHoveredCard && cardHighlightActive,
+        })}
         key={card.id}
         onClick={handleCardClick}
         onMouseEnter={handleMouseEnter}
@@ -198,20 +205,25 @@ export const PalmIsland = (): ReactElement | null => {
   }
 
   function renderCards(): ReactNode | null {
-    const [firstCard, secondCard, ...remainingCards] = cards;
+    const [firstCard, secondCard, thirdCard, ...remainingCards] = cards;
 
     const cardsToRender: ReactNode[] = [];
-    cardsToRender.unshift(renderCard(firstCard, true));
+    cardsToRender.unshift(renderCard(firstCard, 0));
 
     let left: number = 63;
-    cardsToRender.unshift(renderCard(secondCard, false, left));
+    cardsToRender.unshift(renderCard(secondCard, 1, left));
     if (secondCard.isStored) {
       left += 60;
     }
 
-    remainingCards.forEach((remainingCard: PalmIslandCard) => {
+    cardsToRender.unshift(renderCard(thirdCard, 2, left));
+    if (thirdCard.isStored) {
+      left += 60;
+    }
+
+    remainingCards.forEach((remainingCard: PalmIslandCard, index: number) => {
       if (remainingCard.isStored) {
-        cardsToRender.unshift(renderCard(remainingCard, false, left));
+        cardsToRender.unshift(renderCard(remainingCard, index + 3, left));
         left += 60;
       }
     });
@@ -220,6 +232,9 @@ export const PalmIsland = (): ReactElement | null => {
   }
 
   function confirmPaymentIsValid(): boolean {
+    if (cardAction?.cost === "free") {
+      return actionPayment.length === 1;
+    }
     return !!cardAction && checkHasEnoughResourcesToCoverActionCost(cards, cardAction, actionPayment);
   }
 

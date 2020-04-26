@@ -112,8 +112,10 @@ export function actionIsValid(
   const isTopCard: boolean = card.id === cards[0].id;
   const topCardIsRoundMarkerCard: boolean = cards[0].isRoundMarker;
   const hasEnoughResourcesToCoverCost = checkHasEnoughResourcesToCoverActionCost(cards, action);
+  const index: number = cards.findIndex((deckCard: PalmIslandCard) => deckCard.id === card.id);
 
   return (
+    (index === 0 || index === 1) &&
     actionMatchesActiveOrientation &&
     !isStoredCard &&
     ((!topCardIsRoundMarkerCard && !isRoundMarkerCard) || isTopCard) &&
@@ -161,7 +163,7 @@ export function calculateFinalScore(cards: PalmIslandCard[]): string {
     finalScore += activeArea?.victoryPoints || 0;
   });
 
-  let finalRating: string = "";
+  let finalRating: string;
   if (finalScore >= 40) {
     finalRating = "Astounding";
   } else if (finalScore >= 30) {

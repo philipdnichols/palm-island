@@ -35,7 +35,12 @@ export const testBeforeMiddleware: Middleware<{}, PalmIslandState, Dispatch<Palm
             // console.log("card action not paid for!");
             return;
           }
-          if (atMaxResourceLimit(api.getState().cards) && action.actionPayment?.length === 0) {
+          if (
+            action.cardAction.cost === "free" &&
+            atMaxResourceLimit(api.getState().cards) &&
+            !action.actionedCard?.isRoundMarker &&
+            action.actionPayment?.length === 0
+          ) {
             // console.log("at max resource limit");
             return;
           }
